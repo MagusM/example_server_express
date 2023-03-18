@@ -1,0 +1,24 @@
+# Logs
+logs
+*.log
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Production build
+build/
+
+# Dependency lock files
+package-lock.json
+yarn.lock
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.swp
+*.swo
