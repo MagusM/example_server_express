@@ -23,7 +23,7 @@ export const getPosts = async (req, res) => {
 
 export const getPost = async (req, res) => {
     try {
-        const post = getPostById(req.params.id);
+        const post = await getPostById(req.params.id);
         if (post) {
             return res.json(post);
         }
@@ -35,26 +35,26 @@ export const getPost = async (req, res) => {
 }
 
 export const addPost = async (req, res) => {
-    if (!req.params.title || !req.params.desc || !req.params.uid) {
+    if (!req.body.title || !req.body.desc || !req.body.uid) {
         return res.status(400).json('Missing params');
     }
     let user;
     try {
-        user = selectUserByCustomField('id', req.params.uid);
+        user = await selectUserByCustomField('id', req.body.uid);
     } catch (err) {
         return res.send(500).json(`Error trying to fetch user: ${err.message}`);
     }
     if (!user) {
-        return res.status(401).json(`User with ID: ${req.params.uid} not found`);
+        return res.status(401).json(`User with ID: ${req.body.uid} not found`);
     }
     try {
         const post = {
-            title: req.params.title,
-            desc: req.params.desc,
-            img: req.params.img,
-            uid: req.params.uid ?? ''
+            title: req.body.title,
+            desc: req.body.desc,
+            img: req.body.img ?? '',
+            uid: req.body.uid
         }
-        const id = addPostUtil(post);
+        const id = await addPostUtil(post);
         if (id) {
             return res.json({id: id});
         }
@@ -78,7 +78,7 @@ export const deletePost = async (req, res) => {
     }
     try {
         if (tokenVerified) {
-            const deleted = await deletePostUtil(req.body.id);
+            const deleted = await deletePostUtil(req.params.id);
             if (deleted) {
                 return res.json("Post deleted");
             }
@@ -93,10 +93,13 @@ export const deletePost = async (req, res) => {
 }
 
 export const updatePost = async (req, res) => {
+    if (!req.params.id || !req.body.post) {
+        return res.status(401).json('missing params');
+    }
     try {
-        const updated = updatePostUtil(req.body.post);
+        const updated = await updatePostUtil(req.params.id, req.body.post);
         if (updated) {
-            return res.status(200);
+            return res.status(200).json('update successful');
         }
 
         throw new Error('');

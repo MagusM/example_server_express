@@ -45,7 +45,7 @@ const getAllPosts = async (field, value) => {
         }
         const [rows, fields] = await db.query(q, [value]);
         if (rows.length) {
-            return rows[0];
+            return rows;
         }
 
         return null;
@@ -66,7 +66,7 @@ const getAllPosts = async (field, value) => {
  */
 const addPost = async (post) => {
     try {
-        const q = 'insert into posts (title, desc, img, uid) values (?, ?, ?, ?)';
+        const q = 'INSERT INTO `posts` (`title`, `desc`, `img`, `uid`) VALUES (?, ?, ?, ?)';
         const valuesArray = [post.title, post.desc, post.img, post.uid];
 
         const [rows, fields] = await db.query(q, valuesArray);
@@ -92,15 +92,10 @@ const addPost = async (post) => {
  */
 const deletePost = async (id) => {
     try {
-        const q = 'delete from posts where id=?';
+        const q = 'delete from `posts` where `id`=?';
         const [rows, fields] = await db.query(q, [id]);
-        //todo: print fields
-        console.log('fields', fields);
-        if (fields) {
-            return fields;
-        }
-
-        return false;
+        
+        return rows.affectedRows > 0;
     } catch (err) {
         throw new Error(`failed deleting post: ${err.message}`);
     }
@@ -132,20 +127,16 @@ const deleteAllPostsByUserId = async (uid) => {
     }
 }
 
-const updatePost = async (post) => {
+const updatePost = async (id, post) => {
     try {
-        const { id, ...params } = post;
-        let setStr = Object.keys(params).join('=?, ') + '=?';
-        const valueArr = Object.values(params);
+        let setStr = Object.keys(post).join('`=?, `') + '`=?';
+        const valueArr = Object.values(post);
         valueArr.push(id);
-        const q = `update posts set ${setStr} where id=?`;
+        const q = "update `posts` set `" + setStr + " where `id`=?";
+        console.log(q);
         const [rows, fields] = await db.query(q, valueArr);
-        console.log('update post rows', rows);
-        if (rows.length) {
-            return rows;
-        }
-
-        return false;
+        
+        return rows.affectedRows > 0;
     } catch (err) {
         throw new Error(`failed updating post: ${err.message}`);
     }
