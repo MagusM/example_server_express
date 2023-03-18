@@ -1,5 +1,3 @@
-import { db } from "../db.js";
-import { hash } from "../utils/bcrypt.js";
 import { 
     getUserByEmail as getUserByEmailUtil,
     getUserByEmailAndUsername as getUserByEmailAndUsernameUtil,
@@ -58,12 +56,26 @@ export const getUserByEmailAndUsername = async (req, res) => {
  * @throws {Error}
  */
 export const insertUser = async (req, res) => {
+    /**
+     * TODO:
+     * change logic to match the following
+     *  user: {
+     *      email: '',
+     *      username: '',
+     *      setPassword(password) {
+     *          this._password = hash(passowrd);
+     *      }
+     *      getPassword() {
+     *          return this._password
+     *      }
+     *  }
+     */
     try {
         //todo: check return response from utils
-        const res = insertUser({
+        const res = insertUserUtil({
             email: req.body.email,
             username: req.body.username,
-            password: hash(req.body.password)
+            password: req.body.password
         });
         if (res === null) {
             return res.status(400).json('params missing');
@@ -74,6 +86,10 @@ export const insertUser = async (req, res) => {
 
         return res.status(500).json('insert user failed');
     } catch (err) {
-        return res.status(500).json('insert user failed');
+        return res.status(500).json(`insert user failed: ${err.message}`);
     }
+}
+
+export const health = async (req, res) => {
+    return res.json('users route health ok!');
 }
