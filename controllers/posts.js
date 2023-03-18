@@ -6,6 +6,7 @@ import {
     addPost as addPostUtil,
     updatePost as updatePostUtil
 } from "../utils/posts.js";
+import { selectUserByCustomField } from "../utils/users.js";
 
 export const getPosts = async (req, res) => {
     try {
@@ -36,6 +37,15 @@ export const getPost = async (req, res) => {
 export const addPost = async (req, res) => {
     if (!req.params.title || !req.params.desc || !req.params.uid) {
         return res.status(400).json('Missing params');
+    }
+    let user;
+    try {
+        user = selectUserByCustomField('id', req.params.uid);
+    } catch (err) {
+        return res.send(500).json(`Error trying to fetch user: ${err.message}`);
+    }
+    if (!user) {
+        return res.status(401).json(`User with ID: ${req.params.uid} not found`);
     }
     try {
         const post = {
